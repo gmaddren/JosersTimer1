@@ -14,7 +14,7 @@ let package = Package(
         .target(
             name: "JosesTimer",
             dependencies: [],
-            resources: [.copy("Resources")]),
+            resources: []),
         .testTarget(
             name: "JosesTimerTests",
             dependencies: ["JosesTimer"])

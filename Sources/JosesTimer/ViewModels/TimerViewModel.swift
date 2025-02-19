@@ -13,53 +13,81 @@ public class TimerViewModel: ObservableObject {
     
     public init() {
         self.timeRemaining = TimerConfig.workRoundDuration
-        // Remove sound setup for now
     }
     
-    // Optional: Add a placeholder sound setup method
-    private func setupAudio() {
-        // Commented out to prevent test failures
-        // print("Audio setup would occur here")
+    private func playSound(_ soundName: String) {
+        // Simplified audio playback with system sound
+        AudioServicesPlaySystemSound(SystemSoundID(1104)) // Default system sound
+        
+        // Optional: Detailed audio file loading (commented out)
+        /*
+        guard let url = Bundle.module.url(forResource: soundName, withExtension: "wav") else {
+            print("Sound file not found: \(soundName)")
+            return
+        }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.play()
+        } catch {
+            print("Error playing sound: \(error)")
+        }
+        */
     }
     
     public func startTimer() {
+        guard !isRunning else { return }
+        
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.updateTimer()
+        playSound(TimerConfig.workStartSound)
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            
+            self.timeRemaining -= 1
+            
+            // Play warning sound at 5 seconds
+            if self.timeRemaining <= TimerConfig.warningTime {
+                self.playSound("warning")
+            }
+            
+            if self.timeRemaining <= 0 {
+                self.switchRound()
+            }
         }
     }
     
     public func stopTimer() {
-        isRunning = false
         timer?.invalidate()
         timer = nil
+        isRunning = false
     }
     
-    private func updateTimer() {
-        timeRemaining -= 1
-        
-        if timeRemaining <= TimerConfig.warningTime {
-            audioPlayer?.play()
-        }
-        
-        if timeRemaining <= 0 {
-            switchRound()
-        }
-    }
-    
-    private func switchRound() {
+    public func switchRound() {
         if isWorkRound {
-            isWorkRound = false
+            // Switch to rest round
             timeRemaining = TimerConfig.restRoundDuration
+            isWorkRound = false
         } else {
-            isWorkRound = true
+            // Switch to work round
             timeRemaining = TimerConfig.workRoundDuration
+            isWorkRound = true
+            
+            // Only increment round if switching from rest to work
             currentRound += 1
         }
         
+        // Check if total rounds completed
         if currentRound > TimerConfig.totalRounds {
             stopTimer()
-            currentRound = 1
+            resetTimer()
         }
+    }
+    
+    public func resetTimer() {
+        stopTimer()
+        timeRemaining = TimerConfig.workRoundDuration
+        currentRound = 1
+        isWorkRound = true
     }
 } 
