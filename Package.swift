@@ -14,7 +14,9 @@ let package = Package(
         .target(
             name: "JosesTimer",
             dependencies: [],
-            resources: []),
+            resources: [
+                .process("Resources")
+            ]),
         .testTarget(
             name: "JosesTimerTests",
             dependencies: ["JosesTimer"])

@@ -9,9 +9,10 @@ public class TimerViewModel: ObservableObject {
     @Published public var isWorkRound = true
     
     private var timer: Timer?
-    private var audioPlayer: AVAudioPlayer?
+    private let audioService: AudioServiceProtocol
     
-    public init() {
+    public init(audioService: AudioServiceProtocol = AudioService.shared) {
+        self.audioService = audioService
         self.timeRemaining = TimerConfig.workRoundDuration
     }
     
@@ -65,6 +66,14 @@ public class TimerViewModel: ObservableObject {
     
     public func switchRound() {
         if isWorkRound {
+            // Play rest start sound
+            audioService.playSound(TimerConfig.restStartSound)
+        } else {
+            // Play work start sound
+            audioService.playSound(TimerConfig.workStartSound)
+        }
+        
+        if isWorkRound {
             // Switch to rest round
             timeRemaining = TimerConfig.restRoundDuration
             isWorkRound = false
@@ -73,11 +82,11 @@ public class TimerViewModel: ObservableObject {
             timeRemaining = TimerConfig.workRoundDuration
             isWorkRound = true
             
-            // Only increment round if switching from rest to work
+            // Increment round
             currentRound += 1
         }
         
-        // Check if total rounds completed
+        // Explicitly handle total rounds completion
         if currentRound > TimerConfig.totalRounds {
             stopTimer()
             resetTimer()
@@ -85,9 +94,13 @@ public class TimerViewModel: ObservableObject {
     }
     
     public func resetTimer() {
+        // Force stop timer
         stopTimer()
+        
+        // Explicitly reset all state
         timeRemaining = TimerConfig.workRoundDuration
         currentRound = 1
         isWorkRound = true
+        isRunning = false
     }
 } 
