@@ -11,6 +11,8 @@ public struct ContentView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
+            Text("Debug: Timer Initialized")
+            
             TimerDisplayView(viewModel: viewModel)
             
             RoundTrackerView(currentRound: viewModel.currentRound)

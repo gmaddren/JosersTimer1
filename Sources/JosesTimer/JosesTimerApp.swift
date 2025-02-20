@@ -1,10 +1,10 @@
 import SwiftUI
 
-// Remove @main for test compatibility
-public struct JosesTimerApp {
+@main
+public struct JosesTimerApp: App {
     public init() {}
     
-    public static var body: some Scene {
+    public var body: some Scene {
         WindowGroup {
             ContentView()
         }
